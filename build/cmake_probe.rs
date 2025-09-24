@@ -6,7 +6,6 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 
 use semver::Version;
-use shlex::Shlex;
 
 use super::library::Linkage;
 use super::{Result, TARGET_ENV_MSVC};
@@ -166,7 +165,7 @@ impl<'r> CmakeProbe<'r> {
 			out.arg("-DCMAKE_BUILD_TYPE=Debug");
 		}
 		if let Some(args) = &self.args {
-			for arg in Shlex::new(args) {
+			for arg in split_args(args) {
 				out.arg(arg);
 			}
 		}
@@ -217,7 +216,7 @@ impl<'r> CmakeProbe<'r> {
 		link_libs: &mut Vec<LinkLib>,
 	) {
 		eprintln!("=== Extracting build arguments from: {cmdline}");
-		let mut args = Shlex::new(cmdline.trim());
+		let mut args = split_args(cmdline.trim());
 		if skip_cmd {
 			args.next();
 		}
@@ -433,4 +432,14 @@ impl<'r> CmakeProbe<'r> {
 			link_libs,
 		})
 	}
+}
+
+#[cfg(not(windows))]
+fn split_args(args: &str) -> impl Iterator<Item = String> {
+	shlex::Shlex::new(args)
+}
+
+#[cfg(windows)]
+fn split_args(args: &str) -> impl Iterator<Item = String> {
+	winsplit::split(args).into_iter()
 }
