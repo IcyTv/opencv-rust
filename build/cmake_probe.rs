@@ -254,9 +254,11 @@ impl<'r> CmakeProbe<'r> {
 				if let Some(cleaned_lib_filename) = path.file_name().and_then(LinkLib::cleanup_lib_filename) {
 					let linkage = Linkage::from_path(path);
 					if let Some(parent) = path.parent().map(|p| p.to_owned()) {
-						let search_path = LinkSearch(linkage, parent);
-						if !link_paths.contains(&search_path) {
-							link_paths.push(search_path);
+						if !parent.as_os_str().is_empty() {
+							let search_path = LinkSearch(linkage, parent);
+							if !link_paths.contains(&search_path) {
+								link_paths.push(search_path);
+							}
 						}
 					} else {
 						panic!("{}", arg.to_string());
