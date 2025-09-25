@@ -437,7 +437,7 @@ impl<'r> CmakeProbe<'r> {
 }
 
 #[cfg(not(windows))]
-fn split_args(args: &str) -> impl Iterator<Item = String> {
+fn split_args<'a>(args: &'a str) -> impl Iterator<Item = String> + 'a {
 	shlex::Shlex::new(args)
 }
 
